@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { species } from "@/db/schema";
+import { SpeciesCard } from "@/components/species/species-card";
 
 export default async function SpeciesPage() {
   const speciesList = await db.select().from(species);
@@ -39,64 +40,5 @@ export default async function SpeciesPage() {
         </div>
       </main>
     </div>
-  );
-}
-
-function SpeciesCard({ species: s }: { species: typeof species.$inferSelect }) {
-  return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white">
-      <div className="flex h-32 items-center justify-center bg-bush-green/10 text-bush-green">
-        {s.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={s.imageUrl}
-            alt={s.commonName}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-[11px] uppercase tracking-wide">
-            No image yet
-          </span>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <div>
-          <h2 className="font-medium text-zinc-900">{s.commonName}</h2>
-          <p className="text-xs italic text-zinc-500">{s.scientificName}</p>
-        </div>
-        <div className="mt-auto flex flex-wrap gap-1.5">
-          {s.endemic && (
-            <span className="rounded-full bg-bush-green px-2 py-0.5 text-[11px] font-medium text-white">
-              Unique
-            </span>
-          )}
-          <StatusBadge status={s.fluStatus} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    confirmed_infected: "bg-red-100 text-red-800",
-    at_risk: "bg-wattle-gold/25 text-yellow-900",
-    historically_affected: "bg-zinc-200 text-zinc-700",
-    no_known_risk: "bg-zinc-100 text-zinc-500",
-  };
-  const labels: Record<string, string> = {
-    confirmed_infected: "Confirmed infected",
-    at_risk: "At risk",
-    historically_affected: "Historically affected",
-    no_known_risk: "No known risk",
-  };
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-        styles[status] ?? styles.no_known_risk
-      }`}
-    >
-      {labels[status] ?? status}
-    </span>
   );
 }
