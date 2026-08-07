@@ -8,6 +8,20 @@
       "when": 1785843221322,
       "tag": "0000_hot_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786064712689,
+      "tag": "0001_condemned_veda",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786064797248,
+      "tag": "0002_third_tenebrous",
+      "breakpoints": true
     }
   ]
 }

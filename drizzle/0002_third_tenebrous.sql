@@ -1,0 +1,1 @@
+ALTER TABLE "species" DROP COLUMN "image_url";

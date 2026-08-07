@@ -54,7 +54,6 @@ export const species = pgTable("species", {
   fluStatusUpdatedAt: timestamp("flu_status_updated_at"),
   regions: text("regions").array(),
   bio: text("bio"),
-  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -71,4 +70,16 @@ export const sources = pgTable("sources", {
   supportsField: text("supports_field"),
   accessedAt: timestamp("accessed_at").notNull().defaultNow(),
   publishedAt: timestamp("published_at"),
+});
+
+export const speciesImages = pgTable("species_images", {
+  id: serial("id").primaryKey(),
+  speciesId: integer("species_id")
+    .notNull()
+    .references(() => species.id),
+  url: text("url").notNull(),
+  attribution: text("attribution"),
+  altText: text("alt_text"),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
