@@ -306,23 +306,8 @@ export function SpeciesForm({
         </div>
       </div>
 
-      {/* Bio & Image */}
+      {/* Bio */}
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Image URL
-          </label>
-          <input
-            type="url"
-            value={formData.imageUrl ?? ""}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))
-            }
-            className="mt-1 block w-full rounded-md border p-2 text-sm"
-            placeholder="https://..."
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Bio / Description

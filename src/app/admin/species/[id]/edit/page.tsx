@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import { SpeciesForm } from "@/components/species/species-form";
 import { updateSpeciesAction } from "@/app/admin/species/actions";
 import { deleteSourceAction } from "@/app/admin/sources/actions";
+import { speciesImages } from "@/db/schema"; // add to existing schema import
+import { deleteSpeciesImageAction } from "@/app/admin/images/actions"; // add alongside deleteSourceAction import
 
 interface EditPageProps {
   params: Promise<{ id: string }>;
@@ -32,6 +34,11 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
     .from(sources)
     .where(eq(sources.speciesId, speciesId))
     .orderBy(desc(sources.accessedAt));
+
+  const speciesImagesForSpecies = await db
+    .select()
+    .from(speciesImages)
+    .where(eq(speciesImages.speciesId, speciesId));
 
   return (
     <main className="container mx-auto py-8 px-4">
@@ -106,6 +113,64 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+
+      <div className="max-w-2xl mx-auto space-y-4 p-6 border rounded-lg shadow-sm bg-white">
+        <div className="flex items-center justify-between border-b pb-3">
+          <h2 className="text-xl font-bold">Images</h2>
+          <Link
+            href={`/admin/images/new?speciesId=${speciesId}`}
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+          >
+            + Add Image
+          </Link>
+        </div>
+
+        {speciesImagesForSpecies.length === 0 ? (
+          <p className="text-sm text-gray-500">No images added yet.</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {speciesImagesForSpecies.map((image) => (
+              <div
+                key={image.id}
+                className="relative overflow-hidden rounded-md border"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image.url}
+                  alt=""
+                  className="h-24 w-full object-cover"
+                />
+                {image.isPrimary && (
+                  <span className="absolute top-1 left-1 rounded-full bg-indigo-600 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                    Primary
+                  </span>
+                )}
+                <div className="flex items-center justify-between px-1.5 py-1 text-[11px]">
+                  <Link
+                    href={`/admin/images/${image.id}/edit`}
+                    className="text-indigo-600 hover:underline"
+                  >
+                    Edit
+                  </Link>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await deleteSpeciesImageAction(image.id, speciesId);
+                    }}
+                  >
+                    <button
+                      type="submit"
+                      className="text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </main>
