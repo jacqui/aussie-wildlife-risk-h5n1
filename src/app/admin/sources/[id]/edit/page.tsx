@@ -3,7 +3,7 @@ import { sources, species } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { SourceForm } from "@/components/species/source-form";
-import { updateSourceAction } from "../actions";
+import { updateSourceAction } from "@/app/admin/sources/actions";
 
 interface EditSourcePageProps {
   params: Promise<{ id: string }>;

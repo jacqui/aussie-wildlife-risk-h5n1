@@ -1,5 +1,5 @@
 import { SpeciesForm } from "@/components/species/species-form";
-import { createSpeciesAction } from "../actions";
+import { createSpeciesAction } from "@/app/admin/species/actions";
 
 export default function NewSpeciesPage() {
   return (

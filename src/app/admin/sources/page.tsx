@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { sources, species } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { deleteSourceAction } from "./actions";
+import { deleteSourceAction } from "@/app/admin/sources/actions";
 
 export default async function AdminSourcesPage() {
   const allSources = await db

@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { species } from "@/db/schema";
 import { asc } from "drizzle-orm";
 import { SourceForm } from "@/components/species/source-form";
-import { createSourceAction } from "../actions";
+import { createSourceAction } from "@/app/admin/sources/actions";
 
 interface NewSourcePageProps {
   searchParams: Promise<{ speciesId?: string }>;
