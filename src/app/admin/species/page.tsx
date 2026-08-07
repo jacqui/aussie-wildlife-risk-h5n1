@@ -98,12 +98,20 @@ export default async function AdminSpeciesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/admin/species/${item.id}/edit`}
-                        className="font-medium text-indigo-600 hover:text-indigo-900 transition-colors"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex justify-end items-center gap-3">
+                        <Link
+                          href={`/species/${item.slug}`}
+                          className="font-medium text-zinc-600 hover:text-zinc-900"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          href={`/admin/species/${item.id}/edit`}
+                          className="font-medium text-indigo-600 hover:text-indigo-900 transition-colors"
+                        >
+                          Edit
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -42,6 +42,17 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
 
   return (
     <main className="container mx-auto py-8 px-4">
+      <div className="max-w-2xl mx-auto flex justify-end">
+        <Link
+          href={`/species/${existingSpecies.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+        >
+          View public page →
+        </Link>
+      </div>
+
       <div className="max-w-2xl mx-auto">
         <SpeciesForm
           initialData={existingSpecies}
