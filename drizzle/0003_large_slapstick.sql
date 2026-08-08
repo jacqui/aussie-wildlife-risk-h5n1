@@ -1,0 +1,1 @@
+ALTER TABLE "sources" RENAME COLUMN "supports_field" TO "supports_fields";

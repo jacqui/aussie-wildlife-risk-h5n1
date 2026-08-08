@@ -52,7 +52,7 @@ export function SourceForm({
     title: initialData?.title ?? "",
     publisher: initialData?.publisher ?? "",
     sourceType: initialData?.sourceType ?? "news",
-    supportsField: initialData?.supportsField ?? "",
+    supportsFields: initialData?.supportsFields ?? [],
   });
 
   const [publishedAtInput, setPublishedAtInput] = useState(
@@ -72,7 +72,7 @@ export function SourceForm({
         ...formData,
         publisher: formData.publisher || undefined,
         title: formData.title || undefined,
-        supportsField: formData.supportsField || undefined,
+        supportsFields: formData.supportsFields || undefined,
         publishedAt: publishedAtInput ? new Date(publishedAtInput) : undefined,
         accessedAt: accessedAtInput ? new Date(accessedAtInput) : new Date(),
       };
@@ -189,25 +189,31 @@ export function SourceForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Supports Field
+            Supports Fields
           </label>
-          <select
-            value={formData.supportsField}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                supportsField: e.target.value,
-              }))
-            }
-            className="mt-1 block w-full rounded-md border p-2 text-sm"
-          >
-            <option value="">— Unspecified —</option>
+          <div className="mt-1 grid grid-cols-2 gap-2">
             {SUPPORTS_FIELD_OPTIONS.map((field) => (
-              <option key={field} value={field}>
+              <label
+                key={field}
+                className="flex items-center gap-2 text-sm text-gray-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.supportsFields.includes(field)}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      supportsFields: e.target.checked
+                        ? [...prev.supportsFields, field]
+                        : prev.supportsFields.filter((f) => f !== field),
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
                 {field}
-              </option>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
       </div>
 
