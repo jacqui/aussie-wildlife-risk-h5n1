@@ -37,8 +37,8 @@ function toDateInputValue(date?: Date | string | null) {
 
 export function SourceForm({
   speciesId,
-  defaultSpeciesId,
   initialData,
+  defaultSpeciesId,
   onSubmit,
   onCancel,
 }: SourceFormProps) {
@@ -69,7 +69,6 @@ export function SourceForm({
 
     try {
       const payloadToValidate = {
-        speciesId,
         ...formData,
         publisher: formData.publisher || undefined,
         title: formData.title || undefined,

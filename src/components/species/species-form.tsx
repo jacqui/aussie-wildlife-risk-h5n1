@@ -41,7 +41,6 @@ export function SpeciesForm({
     fluRisk: initialData?.fluRisk ?? "low",
     fluStatus: initialData?.fluStatus ?? "no_known_risk",
     bio: initialData?.bio ?? "",
-    imageUrl: initialData?.imageUrl ?? "",
     regions: initialData?.regions ?? [],
   });
 
