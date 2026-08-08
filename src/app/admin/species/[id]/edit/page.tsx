@@ -95,8 +95,8 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
                   <p className="text-xs text-gray-500 mt-0.5">
                     {source.publisher ? `${source.publisher} · ` : ""}
                     {source.sourceType}
-                    {source.supportsField
-                      ? ` · supports: ${source.supportsField}`
+                    {source.supportsFields
+                      ? ` · supports: ${source.supportsFields.join(", ")}`
                       : ""}
                   </p>
                 </div>

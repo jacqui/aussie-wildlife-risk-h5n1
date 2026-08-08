@@ -25,7 +25,7 @@ async function seed() {
     publisher: "Australian Associated Press",
     title: "'Grim news': Penguin alert as bird flu outbreak worsens",
     sourceType: "news",
-    supportsField: "flu_risk",
+    supportsFields: ["flu_risk"],
     publishedAt: new Date("2026-08-04"),
   });
 
@@ -51,7 +51,7 @@ async function seed() {
     publisher: "Australian Conservation Foundation",
     title: "H5N1 bird flu: what you need to know",
     sourceType: "ngo",
-    supportsField: "flu_risk",
+    supportsFields: ["flu_risk"],
   });
 
   const [crestedTern] = await db
@@ -77,7 +77,7 @@ async function seed() {
       publisher: "Australian Associated Press",
       title: "'Grim news': Penguin alert as bird flu outbreak worsens",
       sourceType: "news",
-      supportsField: "flu_status",
+      supportsFields: ["flu_status"],
       publishedAt: new Date("2026-08-04"),
     },
     {
@@ -86,7 +86,7 @@ async function seed() {
       publisher: "FAO EMPRES-i+",
       title: "Animal Disease Events — Australia, Influenza-Avian",
       sourceType: "government",
-      supportsField: "flu_status",
+      supportsFields: ["flu_status"],
     },
   ]);
 
@@ -112,7 +112,7 @@ async function seed() {
     publisher: "DCCEEW",
     title: "H5 bird flu and native species",
     sourceType: "government",
-    supportsField: "flu_risk",
+    supportsFields: ["flu_risk"],
   });
 
   console.log("Seeded 4 species with sources.");

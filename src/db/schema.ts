@@ -67,7 +67,7 @@ export const sources = pgTable("sources", {
   publisher: text("publisher"),
   title: text("title"),
   sourceType: sourceTypeEnum("source_type").notNull(),
-  supportsField: text("supports_field"),
+  supportsFields: text("supports_fields").array(), // was: supportsField (singular text)
   accessedAt: timestamp("accessed_at").notNull().defaultNow(),
   publishedAt: timestamp("published_at"),
 });

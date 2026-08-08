@@ -12,7 +12,7 @@ export default async function AdminSourcesPage() {
       title: sources.title,
       publisher: sources.publisher,
       sourceType: sources.sourceType,
-      supportsField: sources.supportsField,
+      supportsFields: sources.supportsFields,
       accessedAt: sources.accessedAt,
       speciesId: sources.speciesId,
       speciesCommonName: species.commonName,
@@ -107,7 +107,9 @@ export default async function AdminSourcesPage() {
                     <td className="px-6 py-4 capitalize">
                       {source.sourceType}
                     </td>
-                    <td className="px-6 py-4">{source.supportsField ?? "—"}</td>
+                    <td className="px-6 py-4">
+                      {source.supportsFields ?? "—"}
+                    </td>
                     <td className="px-6 py-4">
                       {new Date(source.accessedAt).toLocaleDateString()}
                     </td>
