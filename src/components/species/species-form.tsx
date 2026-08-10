@@ -242,9 +242,9 @@ export function SpeciesForm({
           >
             {FLU_RISKS.map((risk) => (
               <option key={risk} value={risk}>
-                {risk}
+                {risk.replace(/_/g, " ")}
               </option>
-            ))}
+            ))}{" "}
           </select>
         </div>
 

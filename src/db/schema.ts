@@ -24,7 +24,13 @@ export const conservationStatusEnum = pgEnum("conservation_status", [
   "extinct_in_wild",
 ]);
 
-export const fluRiskEnum = pgEnum("flu_risk", ["low", "medium", "high"]);
+export const fluRiskEnum = pgEnum("flu_risk", [
+  "low",
+  "moderate",
+  "high",
+  "very_high",
+  "extreme",
+]);
 
 export const fluStatusEnum = pgEnum("flu_status", [
   "confirmed_infected",
