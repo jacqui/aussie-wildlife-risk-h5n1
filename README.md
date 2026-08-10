@@ -11,6 +11,10 @@ this hobby project aims to answer:
 - where do each live typically?
 - why should we care?
 
+## data sources
+
+- [the official list of risk scores for birds and mammals](https://www.dcceew.gov.au/sites/default/files/documents/national-risk-scores-h5-bird-flu-native-birds-mammals.pdf) - pdf, last update 04 Aug 2026
+
 ## to-do
 
 I'd like to track bird flu detection events, but tbh, that's already being done by the fine person/people behind [https://www.birdflutracker.org/](https://www.birdflutracker.org/).
