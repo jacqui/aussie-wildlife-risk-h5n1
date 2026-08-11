@@ -59,8 +59,8 @@ export default async function SpeciesDetailPage({
           )}
           <StatusBadge status={s.fluStatus} />
           <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium capitalize text-zinc-600">
-            {s.fluRisk} flu risk
-          </span>
+            {s.fluRisk.replace(/_/g, " ")} flu risk
+          </span>{" "}
         </div>
 
         {s.regions && s.regions.length > 0 && (

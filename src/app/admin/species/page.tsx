@@ -87,16 +87,20 @@ export default async function AdminSpeciesPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium capitalize ${
-                          item.fluRisk === "high"
-                            ? "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10"
-                            : item.fluRisk === "medium"
-                              ? "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/10"
-                              : "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/10"
+                          item.fluRisk === "extreme"
+                            ? "bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20"
+                            : item.fluRisk === "very_high"
+                              ? "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10"
+                              : item.fluRisk === "high"
+                                ? "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/10"
+                                : item.fluRisk === "moderate"
+                                  ? "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/10"
+                                  : "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/10"
                         }`}
                       >
-                        {item.fluRisk}
+                        {item.fluRisk.replace(/_/g, " ")}
                       </span>
-                    </td>
+                    </td>{" "}
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center gap-3">
                         <Link
