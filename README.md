@@ -14,6 +14,13 @@ this hobby project aims to answer:
 ## data sources
 
 - [the official list of risk scores for birds and mammals](https://www.dcceew.gov.au/sites/default/files/documents/national-risk-scores-h5-bird-flu-native-birds-mammals.pdf) - pdf, last update 04 Aug 2026
+- ALA search by species scientific name: `bie.ala.org.au/ws/search.json?q="{scientificName}"` (guid, conservationStatus, commonName, isAustralian)
+- ALA species profile: `bie.ala.org.au/ws/species/{guid}.json` (bio, image)
+- FAO Empres-i+ for flu status (disease events, filtered to australia by date range):
+
+```
+https://api.data.apps.fao.org/api/v2/bigquery?sql_url=https://data.apps.fao.org/catalog/dataset/96641600-b15c-493e-8e8d-6c22f145a960/resource/2fc21534-05da-4c58-b773-93a0f28bd1f6/download/avian-influenza-parameterized-query.sql&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&diagnosis_status=all&animal_type=all&disease=Influenza%20-%20Avian&country=Australia
+```
 
 ## to-do
 
