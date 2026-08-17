@@ -6,18 +6,32 @@ from pathlib import Path
 from urllib.parse import quote
 
 import requests
+import wikipediaapi
 
 parent_dir = Path(__file__).resolve().parent.parent
 
-INPUT_CSV = parent_dir / "data" / "species_master.csv"
-OUTPUT_CSV = parent_dir / "data" / "species_master_enriched.csv"
+MASTER_CSV = parent_dir / "data" / "species_master.csv"
+ENRICHED_CSV = parent_dir / "data" / "species_master_enriched.csv"
+
+INPUT_CSV = ENRICHED_CSV if ENRICHED_CSV.exists() else MASTER_CSV
+OUTPUT_CSV = ENRICHED_CSV
+
 DEBUG_LOG = "ala_debug_responses.jsonl" 
 
 ALA_SEARCH_URL = "https://bie.ala.org.au/ws/search.json"
 ALA_SPECIES_URL = "https://bie.ala.org.au/ws/species/{guid}.json"
 
+PROFILE_CACHE_DIR = parent_dir / "data" / "profile_cache"
+PROFILE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 HEADERS = {"User-Agent": "aussie-wildlife-h5n1-tracker research script (contact: lough.jacqui@gmail.com)"}
 RATE_LIMIT_SECONDS = 1.0
+
+wiki = wikipediaapi.Wikipedia(
+    user_agent="AustralianWildlifeResearchProject/1.0 (lough.jacqui@gmail.com)",
+    language="en",
+    extract_format=wikipediaapi.ExtractFormat.WIKI
+)
 
 def ala_search(scientific_name: str, log_raw: bool = False) -> dict | None:
     """Search ALA's BIE for a scientific name; return the best species-rank match."""
@@ -40,6 +54,7 @@ def ala_search(scientific_name: str, log_raw: bool = False) -> dict | None:
             return r
     return results[0] if results else None
 
+
 def ala_species_profile(guid: str, log_raw: bool = False) -> dict:
     """Fetch the full species profile — description text, images, conservation statuses."""
     resp = requests.get(
@@ -56,27 +71,42 @@ def ala_species_profile(guid: str, log_raw: bool = False) -> dict:
 
     return data
 
+def get_cached_profile(guid: str, log_raw: bool = False) -> dict:
+    """Fetch an ALA species profile once, then reuse from disk on every future run."""
+    cache_key = guid.replace("https://", "").replace("/", "_").replace(":", "_")
+    cache_path = PROFILE_CACHE_DIR / f"{cache_key}.json"
 
-def extract_bio_candidate(profile: dict) -> str:
-    # GUESS — verify against DEBUG_LOG and adjust. ALA profiles commonly nest
-    # description text under something like "taxonConcept"/"descriptions".
-    descriptions = profile.get("descriptions", [])
-    for d in descriptions:
-        text = d.get("description", "").strip()
-        if text:
-            return text
-    return ""
+    if cache_path.exists():
+        return json.loads(cache_path.read_text())
+
+    profile = ala_species_profile(guid, log_raw=log_raw)
+    cache_path.write_text(json.dumps(profile))
+    return profile
+
+def extract_bio_candidate(scientific_name: str) -> tuple[str, str]:
+    attr = "Wikipedia (https://en.wikipedia.org/wiki/" + quote(scientific_name.replace(" ", "_")) + ")"
+    try:
+        page = wiki.page(scientific_name)
+        if page.exists():
+            return page.summary, attr
+    except Exception as e:
+        print(f"  Wikipedia lookup failed for {scientific_name}: {e}")
+    return "No summary available on Wikipedia for this species.", attr
+
+def get_ala_image_url(image_id: str, image_size: str = "thumbnail_large") -> str:
+    clean_id = image_id.strip().strip('"').strip("'")
+    path_fragment = "/".join(clean_id[:4])
+    return f"https://images.ala.org.au/store/{path_fragment}/{clean_id}/{image_size}"
 
 
 def extract_image_candidate(profile: dict) -> tuple[str, str]:
-    # GUESS — same caveat.
-    images = profile.get("images", [])
-    if images:
-        img = images[0]
-        url = img.get("largeImageUrl") or img.get("imageUrl", "")
-        attribution = img.get("rightsHolder") or img.get("creator", "")
+    image_id = profile.get("imageIdentifier", "")
+    if image_id:
+        url = get_ala_image_url(image_id)
+        attribution = "Atlas of Living Australia (ALA) via https://bie.ala.org.au/species/" + profile.get("guid", "")
         return url, attribution
     return "", ""
+
 
 def load_existing_output() -> dict[str, dict]:
     """Resume support: species already marked 'done' get skipped on re-run."""
@@ -89,18 +119,20 @@ CANDIDATE_FIELDS = [
     "alaGuid",
     "endemicCandidate", "endemicCandidateNotes",
     "conservationStatusCandidate", "conservationStatusCandidateRaw",
-    "bioCandidate",
+    "bioCandidate", "bioAttributionCandidate",
     "imageUrlCandidate", "imageAttributionCandidate",
     "fluStatusCandidate",
     "scriptStatus", "scriptError",
 ]
 
 def main():
+
     with open(INPUT_CSV) as f:
         master_rows = list(csv.DictReader(f))
-        base_fieldnames = list(master_rows[0].keys())
+        base_fieldnames = [f for f in master_rows[0].keys() if f not in CANDIDATE_FIELDS]
 
     output_fieldnames = base_fieldnames + CANDIDATE_FIELDS
+
     existing = load_existing_output()
 
     with open(OUTPUT_CSV, "w", newline="") as out_f:
@@ -127,13 +159,22 @@ def main():
                     row["alaGuid"] = match.get("guid", "")
                     row["conservationStatusCandidateRaw"] = match.get("conservationStatus") or ""
 
-                    profile = ala_species_profile(match["guid"], log_raw=log_raw)
-                    time.sleep(RATE_LIMIT_SECONDS)
+                    cache_path = PROFILE_CACHE_DIR / f"{match['guid'].replace('https://', '').replace('/', '_').replace(':', '_')}.json"
+                    was_cached = cache_path.exists()
+                    profile = get_cached_profile(match["guid"], log_raw=log_raw)
+                    if not was_cached:
+                        time.sleep(RATE_LIMIT_SECONDS)
 
-                    row["bioCandidate"] = extract_bio_candidate(profile)
+                    bio_text, bio_attr = extract_bio_candidate(sci_name)
+                    row["bioCandidate"] = bio_text
+                    row["bioAttributionCandidate"] = bio_attr
+
                     img_url, img_attr = extract_image_candidate(profile)
                     row["imageUrlCandidate"] = img_url
                     row["imageAttributionCandidate"] = img_attr
+
+                    if row["researchStatus"] == "not_started":
+                        row["researchStatus"] = "in_progress"
 
                 row["scriptStatus"] = "done"
 
