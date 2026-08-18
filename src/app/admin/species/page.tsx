@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { db } from "@/db";
 import { species } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
-export default async function AdminSpeciesPage() {
-  // Fetch all species ordered alphabetically by common_name
+interface AdminSpeciesPageProps {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function AdminSpeciesPage({
+  searchParams,
+}: AdminSpeciesPageProps) {
+  const { status } = await searchParams;
+
   const speciesList = await db
     .select()
     .from(species)
+    .where(status ? eq(species.researchStatus, status as any) : undefined)
     .orderBy(asc(species.commonName));
 
   return (
@@ -31,6 +39,29 @@ export default async function AdminSpeciesPage() {
           </Link>
         </div>
 
+        <div className="flex gap-2 text-sm">
+          {[
+            "all",
+            "not_started",
+            "in_progress",
+            "needs_review",
+            "verified",
+          ].map((s) => (
+            <Link
+              key={s}
+              href={
+                s === "all" ? "/admin/species" : `/admin/species?status=${s}`
+              }
+              className={`px-3 py-1 rounded-full capitalize ${
+                (status ?? "all") === s
+                  ? "bg-indigo-600 text-white"
+                  : "bg-zinc-100 text-zinc-600"
+              }`}
+            >
+              {s.replace(/_/g, " ")}
+            </Link>
+          ))}
+        </div>
         {/* Species Table */}
         <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm text-zinc-600">
@@ -50,6 +81,9 @@ export default async function AdminSpeciesPage() {
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Flu Risk
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Research Status
                 </th>
                 <th scope="col" className="px-6 py-3 text-right">
                   Actions
@@ -101,6 +135,21 @@ export default async function AdminSpeciesPage() {
                         {item.fluRisk.replace(/_/g, " ")}
                       </span>
                     </td>{" "}
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium capitalize ${
+                          item.researchStatus === "verified"
+                            ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/10"
+                            : item.researchStatus === "needs_review"
+                              ? "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10"
+                              : item.researchStatus === "in_progress"
+                                ? "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/10"
+                                : "bg-zinc-100 text-zinc-600 ring-1 ring-inset ring-zinc-500/10"
+                        }`}
+                      >
+                        {item.researchStatus.replace(/_/g, " ")}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center gap-3">
                         <Link

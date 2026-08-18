@@ -47,6 +47,13 @@ export const sourceTypeEnum = pgEnum("source_type", [
   "other",
 ]);
 
+export const researchStatusEnum = pgEnum("research_status", [
+  "not_started",
+  "in_progress",
+  "needs_review",
+  "verified",
+]);
+
 export const species = pgTable("species", {
   id: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),
@@ -60,6 +67,9 @@ export const species = pgTable("species", {
   fluStatusUpdatedAt: timestamp("flu_status_updated_at"),
   regions: text("regions").array(),
   bio: text("bio"),
+  researchStatus: researchStatusEnum("research_status")
+    .notNull()
+    .default("not_started"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

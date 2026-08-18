@@ -46,6 +46,7 @@ async function run() {
         fluRisk: row.fluRisk,
         fluStatus: "no_known_risk",
         bio: row.bioCandidate || null, // DRAFT — Wikipedia-sourced, unverified
+        researchStatus: row.researchStatus || "not_started",
       })
       .returning();
 

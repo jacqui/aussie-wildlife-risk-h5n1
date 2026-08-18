@@ -102,7 +102,7 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
                 </div>
                 <div className="flex shrink-0 items-center gap-3 text-sm">
                   <Link
-                    href={`/admin/species/${speciesId}/sources/${source.id}/edit`}
+                    href={`/admin/sources/${source.id}/edit`}
                     className="font-medium text-indigo-600 hover:text-indigo-900"
                   >
                     Edit
