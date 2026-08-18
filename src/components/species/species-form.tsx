@@ -20,6 +20,7 @@ const TAXON_GROUPS = species.taxonGroup.enumValues;
 const CONSERVATION_STATUSES = species.conservationStatus.enumValues;
 const FLU_RISKS = species.fluRisk.enumValues;
 const FLU_STATUSES = species.fluStatus.enumValues;
+const RESEARCH_STATUSES = species.researchStatus.enumValues;
 
 export function SpeciesForm({
   initialData,
@@ -42,6 +43,7 @@ export function SpeciesForm({
     fluStatus: initialData?.fluStatus ?? "no_known_risk",
     bio: initialData?.bio ?? "",
     regions: initialData?.regions ?? [],
+    researchStatus: initialData?.researchStatus ?? "not_started",
   });
 
   // Raw text input for handling PostgreSQL array input
@@ -114,6 +116,28 @@ export function SpeciesForm({
             ? `Edit Species: ${initialData?.commonName}`
             : "Create New Species"}
         </h2>
+      </div>
+
+      <div className="rounded-md bg-zinc-50 border border-zinc-200 p-3">
+        <label className="block text-sm font-medium text-gray-700">
+          Research Status
+        </label>
+        <select
+          value={formData.researchStatus}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              researchStatus: e.target.value as any,
+            }))
+          }
+          className="mt-1 block w-full rounded-md border p-2 text-sm capitalize"
+        >
+          {RESEARCH_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {status.replace(/_/g, " ")}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Basic Info */}
