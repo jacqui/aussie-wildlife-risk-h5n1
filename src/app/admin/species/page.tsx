@@ -134,7 +134,7 @@ export default async function AdminSpeciesPage({
                       >
                         {item.fluRisk.replace(/_/g, " ")}
                       </span>
-                    </td>{" "}
+                    </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium capitalize ${
