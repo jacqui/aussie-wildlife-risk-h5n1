@@ -9,7 +9,7 @@ export function StatusBadge({ status }: { status: string }) {
     confirmed_infected: "Confirmed infected",
     at_risk: "At risk",
     historically_affected: "Historically affected",
-    no_known_risk: "No known risk",
+    no_known_risk: "No known infections",
   };
   return (
     <span
