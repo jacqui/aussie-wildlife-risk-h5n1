@@ -2,24 +2,41 @@
 import Link from "next/link";
 import { db } from "@/db";
 import { species } from "@/db/schema";
-import { asc, count, eq } from "drizzle-orm";
+import { asc, and, count, eq, ilike, or } from "drizzle-orm";
 import { Pagination } from "@/components/ui/pagination";
 
 const PAGE_SIZE = 25;
 
 interface AdminSpeciesPageProps {
-  searchParams: Promise<{ status?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
+}
+
+function buildHref(params: { status?: string; q?: string; page?: number }) {
+  const usp = new URLSearchParams();
+  if (params.status) usp.set("status", params.status);
+  if (params.q) usp.set("q", params.q);
+  if (params.page && params.page > 1) usp.set("page", String(params.page));
+  const qs = usp.toString();
+  return `/admin/species${qs ? `?${qs}` : ""}`;
 }
 
 export default async function AdminSpeciesPage({
   searchParams,
 }: AdminSpeciesPageProps) {
-  const { status, page: pageParam } = await searchParams;
+  const { status, q, page: pageParam } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const whereClause = status
-    ? eq(species.researchStatus, status as any)
-    : undefined;
+  const conditions = [];
+  if (status) conditions.push(eq(species.researchStatus, status as any));
+  if (q) {
+    conditions.push(
+      or(
+        ilike(species.commonName, `%${q}%`),
+        ilike(species.scientificName, `%${q}%`),
+      ),
+    );
+  }
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [{ value: totalCount }] = await db
     .select({ value: count() })
@@ -35,14 +52,6 @@ export default async function AdminSpeciesPage({
     .orderBy(asc(species.commonName))
     .limit(PAGE_SIZE)
     .offset((currentPage - 1) * PAGE_SIZE);
-
-  const buildHref = (page: number) => {
-    const params = new URLSearchParams();
-    if (status) params.set("status", status);
-    if (page > 1) params.set("page", String(page));
-    const qs = params.toString();
-    return `/admin/species${qs ? `?${qs}` : ""}`;
-  };
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 font-sans min-h-screen">
@@ -64,6 +73,37 @@ export default async function AdminSpeciesPage({
           </Link>
         </div>
 
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <form
+            action="/admin/species"
+            method="GET"
+            className="flex gap-2 flex-1"
+          >
+            {status && <input type="hidden" name="status" value={status} />}
+            <input
+              type="text"
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Search by common or scientific name…"
+              className="w-full max-w-sm rounded-md border p-2 text-sm"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+            >
+              Search
+            </button>
+            {q && (
+              <Link
+                href={buildHref({ status })}
+                className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
+              >
+                Clear
+              </Link>
+            )}
+          </form>
+        </div>
+
         <div className="flex gap-2 text-sm">
           {[
             "all",
@@ -74,9 +114,7 @@ export default async function AdminSpeciesPage({
           ].map((s) => (
             <Link
               key={s}
-              href={
-                s === "all" ? "/admin/species" : `/admin/species?status=${s}`
-              }
+              href={buildHref({ status: s === "all" ? undefined : s, q })}
               className={`px-3 py-1 rounded-full capitalize ${
                 (status ?? "all") === s
                   ? "bg-indigo-600 text-white"
@@ -196,12 +234,17 @@ export default async function AdminSpeciesPage({
               )}
             </tbody>
           </table>
+          {speciesList.length === 0 && (
+            <p className="px-6 py-8 text-center text-zinc-500">
+              No species match {q ? `"${q}"` : "this filter"}.
+            </p>
+          )}
         </div>
 
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          buildHref={buildHref}
+          buildHref={(page) => buildHref({ status, q, page })}
         />
       </main>
     </div>
