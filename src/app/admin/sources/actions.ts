@@ -12,7 +12,7 @@ export async function createSourceAction(data: SourceFormData) {
   await db.insert(sources).values(validatedData);
   revalidatePath("/admin/sources");
   revalidatePath(`/admin/species/${validatedData.speciesId}/edit`);
-  redirect("/admin/sources");
+  redirect(`/admin/species/${validatedData.speciesId}/edit`);
 }
 
 export async function updateSourceAction(
@@ -23,7 +23,7 @@ export async function updateSourceAction(
   await db.update(sources).set(validatedData).where(eq(sources.id, sourceId));
   revalidatePath("/admin/sources");
   revalidatePath(`/admin/species/${validatedData.speciesId}/edit`);
-  redirect("/admin/sources");
+  redirect(`/admin/species/${validatedData.speciesId}/edit`);
 }
 
 // No redirect on delete — called inline from the sources list/species edit
