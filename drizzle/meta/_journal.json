@@ -50,6 +50,13 @@
       "when": 1787184800550,
       "tag": "0006_shrink_flu_status_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787269125795,
+      "tag": "0007_slimy_loki",
+      "breakpoints": true
     }
   ]
 }

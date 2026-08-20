@@ -8,6 +8,23 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
+export const homepageNewsItems = pgTable("homepage_news_items", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  source: text("source").notNull(),
+  url: text("url").notNull(),
+  displayDate: text("display_date"), // free text like "September 2024" — shown as-is, never parsed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const homepageOfficialSources = pgTable("homepage_official_sources", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const taxonGroupEnum = pgEnum("taxon_group", [
   "bird",
   "mammal",
