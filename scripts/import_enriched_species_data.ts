@@ -44,7 +44,7 @@ async function run() {
         // (see conservationStatusCandidateRaw in the CSV for which).
         conservationStatus: row.conservationStatusCandidate || null,
         fluRisk: row.fluRisk,
-        fluStatus: "no_known_risk",
+        fluStatus: "at_risk",
         bio: row.bioCandidate || null, // DRAFT — Wikipedia-sourced, unverified
         researchStatus: row.researchStatus || "not_started",
       })
