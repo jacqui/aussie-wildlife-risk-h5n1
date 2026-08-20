@@ -40,7 +40,7 @@ export function SpeciesForm({
     endemic: initialData?.endemic ?? false,
     conservationStatus: initialData?.conservationStatus ?? "least_concern",
     fluRisk: initialData?.fluRisk ?? "low",
-    fluStatus: initialData?.fluStatus ?? "no_known_risk",
+    fluStatus: initialData?.fluStatus ?? "at_risk",
     bio: initialData?.bio ?? "",
     regions: initialData?.regions ?? [],
     researchStatus: initialData?.researchStatus ?? "not_started",
@@ -139,7 +139,6 @@ export function SpeciesForm({
           ))}
         </select>
       </div>
-
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

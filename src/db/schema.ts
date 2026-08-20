@@ -35,8 +35,6 @@ export const fluRiskEnum = pgEnum("flu_risk", [
 export const fluStatusEnum = pgEnum("flu_status", [
   "confirmed_infected",
   "at_risk",
-  "historically_affected",
-  "no_known_risk",
 ]);
 
 export const sourceTypeEnum = pgEnum("source_type", [
@@ -63,7 +61,7 @@ export const species = pgTable("species", {
   endemic: boolean("endemic").notNull().default(false),
   conservationStatus: conservationStatusEnum("conservation_status"),
   fluRisk: fluRiskEnum("flu_risk").notNull().default("low"),
-  fluStatus: fluStatusEnum("flu_status").notNull().default("no_known_risk"),
+  fluStatus: fluStatusEnum("flu_status").notNull().default("at_risk"),
   fluStatusUpdatedAt: timestamp("flu_status_updated_at"),
   regions: text("regions").array(),
   bio: text("bio"),
