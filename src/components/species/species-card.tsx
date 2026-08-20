@@ -43,7 +43,9 @@ export function SpeciesCard({
               Unique
             </span>
           )}
-          <StatusBadge status={s.fluStatus} />
+          {s.fluStatus && s.fluStatus !== "at_risk" && (
+            <StatusBadge status={s.fluStatus} />
+          )}
         </div>
       </div>
     </div>
