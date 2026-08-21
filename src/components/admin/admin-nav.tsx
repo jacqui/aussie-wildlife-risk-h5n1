@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/admin/species", label: "Species" },
   { href: "/admin/sources", label: "Sources" },
   { href: "/admin/images", label: "Images" },
+  { href: "/admin/homepage", label: "Homepage" },
 ];
 
 export function AdminNav() {
