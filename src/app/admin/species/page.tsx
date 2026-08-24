@@ -1,9 +1,10 @@
-// src/app/admin/species/page.tsx
 import Link from "next/link";
 import { db } from "@/db";
 import { species } from "@/db/schema";
 import { asc, and, count, eq, ilike, or } from "drizzle-orm";
 import { Pagination } from "@/components/ui/pagination";
+import { deleteSpeciesAction } from "@/app/admin/species/actions";
+import { DeleteSpeciesButton } from "@/components/admin/delete-species-button";
 
 const PAGE_SIZE = 25;
 
@@ -227,6 +228,11 @@ export default async function AdminSpeciesPage({
                         >
                           Edit
                         </Link>
+                        <DeleteSpeciesButton
+                          speciesId={item.id}
+                          speciesName={item.commonName}
+                          action={deleteSpeciesAction}
+                        />
                       </div>
                     </td>
                   </tr>

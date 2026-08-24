@@ -1,13 +1,18 @@
 import { db } from "@/db";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { species, sources } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { SpeciesForm } from "@/components/species/species-form";
-import { updateSpeciesAction } from "@/app/admin/species/actions";
+import {
+  updateSpeciesAction,
+  deleteSpeciesAction,
+} from "@/app/admin/species/actions";
 import { deleteSourceAction } from "@/app/admin/sources/actions";
 import { speciesImages } from "@/db/schema"; // add to existing schema import
 import { deleteSpeciesImageAction } from "@/app/admin/images/actions"; // add alongside deleteSourceAction import
+import { DeleteSpeciesButton } from "@/components/admin/delete-species-button";
 
 interface EditPageProps {
   params: Promise<{ id: string }>;
@@ -40,6 +45,24 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
     .from(speciesImages)
     .where(eq(speciesImages.speciesId, speciesId));
 
+  // Figure out where the user came from (species list w/ filters, search
+  // results, etc) so "Update species" can send them back there instead of
+  // always landing on the plain /admin/species list. Falls back to the
+  // plain list if there's no referer or it points outside /admin.
+  const headersList = await headers();
+  const referer = headersList.get("referer");
+  let returnTo = "/admin/species";
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      if (refererUrl.pathname.startsWith("/admin")) {
+        returnTo = `${refererUrl.pathname}${refererUrl.search}`;
+      }
+    } catch {
+      // ignore malformed referer, fall back to default
+    }
+  }
+
   return (
     <main className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto flex justify-end">
@@ -58,7 +81,7 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
           initialData={existingSpecies}
           onSubmit={async (data) => {
             "use server";
-            await updateSpeciesAction(speciesId, data);
+            await updateSpeciesAction(speciesId, data, returnTo);
           }}
         />
       </div>
@@ -183,6 +206,23 @@ export default async function EditSpeciesPage({ params }: EditPageProps) {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="max-w-2xl mx-auto space-y-3 p-6 border border-red-200 rounded-lg shadow-sm bg-red-50">
+        <div className="border-b border-red-200 pb-3">
+          <h2 className="text-xl font-bold text-red-900">Danger zone</h2>
+          <p className="text-sm text-red-700 mt-1">
+            Deleting this species also deletes all of its sources and images.
+            This can&apos;t be undone.
+          </p>
+        </div>
+        <DeleteSpeciesButton
+          speciesId={speciesId}
+          speciesName={existingSpecies.commonName}
+          action={deleteSpeciesAction}
+          redirectTo="/admin/species"
+          className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+        />
       </div>
     </main>
   );
