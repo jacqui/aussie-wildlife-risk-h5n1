@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db"; // Path to your drizzle db instance
-import { species } from "@/db/schema";
+import { species, sources, speciesImages } from "@/db/schema";
 
 import {
   insertSpeciesSchema,
@@ -11,6 +11,13 @@ import { eq } from "drizzle-orm";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+// Only ever redirect back into the admin area — never follow an
+// arbitrary/external "returnTo" value (open-redirect protection).
+function resolveReturnTo(returnTo?: string) {
+  if (returnTo && returnTo.startsWith("/admin")) return returnTo;
+  return "/admin/species";
+}
 
 export async function createSpeciesAction(data: SpeciesFormData) {
   // 1. Server-side validation check
@@ -26,7 +33,11 @@ export async function createSpeciesAction(data: SpeciesFormData) {
   redirect("/admin/species");
 }
 
-export async function updateSpeciesAction(id: number, data: SpeciesFormData) {
+export async function updateSpeciesAction(
+  id: number,
+  data: SpeciesFormData,
+  returnTo?: string,
+) {
   // 1. Validate incoming data against the Zod schema
   const validatedData = insertSpeciesSchema.parse(data);
 
@@ -44,6 +55,20 @@ export async function updateSpeciesAction(id: number, data: SpeciesFormData) {
   revalidatePath("/admin/species");
   revalidatePath(`/admin/species/${id}/edit`);
 
-  // 4. Redirect back to the main species list
-  redirect("/admin/species");
+  // 4. Redirect back to wherever the editor came from (list w/ filters,
+  // search results, etc), falling back to the plain species list.
+  redirect(resolveReturnTo(returnTo));
+}
+
+export async function deleteSpeciesAction(id: number) {
+  // No FK cascade is defined on sources/speciesImages, and the neon-http
+  // driver doesn't support transactions — so delete children first,
+  // sequentially, before the parent row.
+  await db.delete(speciesImages).where(eq(speciesImages.speciesId, id));
+  await db.delete(sources).where(eq(sources.speciesId, id));
+  await db.delete(species).where(eq(species.id, id));
+
+  revalidatePath("/admin/species");
+  revalidatePath("/admin/images");
+  revalidatePath("/admin/sources");
 }
