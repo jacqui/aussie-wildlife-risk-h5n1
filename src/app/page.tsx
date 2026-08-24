@@ -15,13 +15,24 @@ export default async function Home() {
     .select({ value: count() })
     .from(species);
 
+  // Real total, not "however many happened to come back from a LIMIT 6
+  // query" — these are two different questions and need two queries.
+  const [{ value: totalConfirmedCount }] = await db
+    .select({ value: count() })
+    .from(species)
+    .where(eq(species.fluStatus, "confirmed_infected"));
+
   const confirmedInfected = await db
     .select()
     .from(species)
     .where(eq(species.fluStatus, "confirmed_infected"))
+    // Explicit order so the homepage shows the same 6 species on every
+    // request instead of an arbitrary subset (Postgres makes no row-order
+    // guarantee without ORDER BY, and it can shift after any UPDATE).
+    // Most recently confirmed first.
+    .orderBy(desc(species.fluStatusUpdatedAt))
     .limit(6);
 
-  const totalConfirmedCount = confirmedInfected.length;
   const confirmedIds = confirmedInfected.map((s) => s.id);
   const primaryImages = confirmedIds.length
     ? await db
