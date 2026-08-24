@@ -1,3 +1,4 @@
+// src/app/admin/species/page.tsx
 import Link from "next/link";
 import { db } from "@/db";
 import { species } from "@/db/schema";
@@ -9,12 +10,23 @@ import { DeleteSpeciesButton } from "@/components/admin/delete-species-button";
 const PAGE_SIZE = 25;
 
 interface AdminSpeciesPageProps {
-  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    flu?: string;
+    q?: string;
+    page?: string;
+  }>;
 }
 
-function buildHref(params: { status?: string; q?: string; page?: number }) {
+function buildHref(params: {
+  status?: string;
+  flu?: string;
+  q?: string;
+  page?: number;
+}) {
   const usp = new URLSearchParams();
   if (params.status) usp.set("status", params.status);
+  if (params.flu) usp.set("flu", params.flu);
   if (params.q) usp.set("q", params.q);
   if (params.page && params.page > 1) usp.set("page", String(params.page));
   const qs = usp.toString();
@@ -24,11 +36,12 @@ function buildHref(params: { status?: string; q?: string; page?: number }) {
 export default async function AdminSpeciesPage({
   searchParams,
 }: AdminSpeciesPageProps) {
-  const { status, q, page: pageParam } = await searchParams;
+  const { status, flu, q, page: pageParam } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
   const conditions = [];
   if (status) conditions.push(eq(species.researchStatus, status as any));
+  if (flu) conditions.push(eq(species.fluStatus, flu as any));
   if (q) {
     conditions.push(
       or(
@@ -81,6 +94,7 @@ export default async function AdminSpeciesPage({
             className="flex gap-2 flex-1"
           >
             {status && <input type="hidden" name="status" value={status} />}
+            {flu && <input type="hidden" name="flu" value={flu} />}
             <input
               type="text"
               name="q"
@@ -96,7 +110,7 @@ export default async function AdminSpeciesPage({
             </button>
             {q && (
               <Link
-                href={buildHref({ status })}
+                href={buildHref({ status, flu })}
                 className="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
               >
                 Clear
@@ -105,7 +119,7 @@ export default async function AdminSpeciesPage({
           </form>
         </div>
 
-        <div className="flex gap-2 text-sm">
+        <div className="flex flex-wrap gap-2 text-sm">
           {[
             "all",
             "not_started",
@@ -115,7 +129,7 @@ export default async function AdminSpeciesPage({
           ].map((s) => (
             <Link
               key={s}
-              href={buildHref({ status: s === "all" ? undefined : s, q })}
+              href={buildHref({ status: s === "all" ? undefined : s, flu, q })}
               className={`px-3 py-1 rounded-full capitalize ${
                 (status ?? "all") === s
                   ? "bg-indigo-600 text-white"
@@ -123,6 +137,22 @@ export default async function AdminSpeciesPage({
               }`}
             >
               {s.replace(/_/g, " ")}
+            </Link>
+          ))}
+
+          <span className="mx-1 self-center text-zinc-300">|</span>
+
+          {["all", "confirmed_infected", "at_risk"].map((f) => (
+            <Link
+              key={f}
+              href={buildHref({ status, flu: f === "all" ? undefined : f, q })}
+              className={`px-3 py-1 rounded-full capitalize ${
+                (flu ?? "all") === f
+                  ? "bg-red-600 text-white"
+                  : "bg-zinc-100 text-zinc-600"
+              }`}
+            >
+              {f === "all" ? "any flu status" : f.replace(/_/g, " ")}
             </Link>
           ))}
         </div>
@@ -250,7 +280,7 @@ export default async function AdminSpeciesPage({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          buildHref={(page) => buildHref({ status, q, page })}
+          buildHref={(page) => buildHref({ status, flu, q, page })}
         />
       </main>
     </div>
