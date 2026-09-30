@@ -1,3 +1,4 @@
+// src/app/page.tsx
 import Link from "next/link";
 import { db } from "@/db";
 import {
@@ -87,8 +88,18 @@ export default async function Home() {
         </p>
 
         <p className="mt-3 text-sm italic text-zinc-500">
-          As of {today}, {totalCount} species are tracked, with{" "}
-          {totalConfirmedCount} having confirmed H5N1 infections.
+          As of {today},{" "}
+          <Link href="/species" className="not-italic font-medium underline">
+            {totalCount} species
+          </Link>{" "}
+          are tracked, with{" "}
+          <Link
+            href="/species?flu=confirmed_infected"
+            className="not-italic font-medium underline"
+          >
+            {totalConfirmedCount} having confirmed H5N1 infections
+          </Link>
+          .
         </p>
 
         <div className="mt-4">
