@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import Link from "next/link";
 import { db } from "@/db";
 import {
@@ -102,9 +101,19 @@ export default async function Home() {
         </div>
 
         <section className="mt-10">
-          <h2 className="text-lg font-semibold text-zinc-900">
-            Species with confirmed H5N1 infections
-          </h2>
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-semibold text-zinc-900">
+              Latest species with confirmed H5N1 infections
+            </h2>
+            {totalConfirmedCount > confirmedInfected.length && (
+              <Link
+                href="/species?flu=confirmed_infected"
+                className="text-sm font-medium text-bush-green hover:underline whitespace-nowrap"
+              >
+                View all {totalConfirmedCount} →
+              </Link>
+            )}
+          </div>
           {confirmedInfected.length === 0 ? (
             <p className="mt-2 text-sm text-zinc-500">
               No species in this dataset currently have a confirmed H5N1

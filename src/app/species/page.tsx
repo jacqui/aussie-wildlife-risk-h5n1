@@ -1,35 +1,53 @@
-// src/app/species/page.tsx
 import Link from "next/link";
 import { db } from "@/db";
 import { species, speciesImages } from "@/db/schema";
-import { asc, ilike, inArray, or, count } from "drizzle-orm";
+import {
+  asc,
+  desc,
+  ilike,
+  inArray,
+  or,
+  and,
+  eq,
+  count,
+  sql,
+} from "drizzle-orm";
 import { SpeciesCard } from "@/components/species/species-card";
 import { Pagination } from "@/components/ui/pagination";
 
 const PAGE_SIZE = 24; // divisible by 2/3/4 columns at each breakpoint
 
 interface SpeciesPageProps {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; flu?: string; page?: string }>;
 }
 
-function buildHref(params: { q?: string; page?: number }) {
+function buildHref(params: { q?: string; flu?: string; page?: number }) {
   const usp = new URLSearchParams();
   if (params.q) usp.set("q", params.q);
+  if (params.flu) usp.set("flu", params.flu);
   if (params.page && params.page > 1) usp.set("page", String(params.page));
   const qs = usp.toString();
   return `/species${qs ? `?${qs}` : ""}`;
 }
 
 export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
-  const { q, page: pageParam } = await searchParams;
+  const { q, flu, page: pageParam } = await searchParams;
   const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const whereClause = q
-    ? or(
+  const conditions = [];
+  if (flu)
+    conditions.push(
+      eq(species.fluStatus, flu as "confirmed_infected" | "at_risk"),
+    );
+  if (q) {
+    conditions.push(
+      or(
         ilike(species.commonName, `%${q}%`),
         ilike(species.scientificName, `%${q}%`),
-      )
-    : undefined;
+      ),
+    );
+  }
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [{ value: totalCount }] = await db
     .select({ value: count() })
@@ -41,7 +59,13 @@ export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
     .select()
     .from(species)
     .where(whereClause)
-    .orderBy(asc(species.commonName))
+    // Confirmed-infected species surface first, most-recently-confirmed at
+    // the very top; everyone else follows alphabetically.
+    .orderBy(
+      sql`CASE WHEN ${species.fluStatus} = 'confirmed_infected' THEN 0 ELSE 1 END`,
+      desc(species.fluStatusUpdatedAt),
+      asc(species.commonName),
+    )
     .limit(PAGE_SIZE)
     .offset((currentPage - 1) * PAGE_SIZE);
 
@@ -73,6 +97,7 @@ export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
           method="GET"
           className="mt-4 flex gap-2 max-w-sm"
         >
+          {flu && <input type="hidden" name="flu" value={flu} />}
           <input
             type="text"
             name="q"
@@ -88,7 +113,7 @@ export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
           </button>
           {q && (
             <Link
-              href="/species"
+              href={buildHref({ flu })}
               className="px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900"
             >
               Clear
@@ -96,8 +121,30 @@ export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
           )}
         </form>
 
+        <div className="mt-3 flex flex-wrap gap-2 text-sm">
+          {[
+            { value: undefined, label: "All" },
+            { value: "confirmed_infected", label: "Confirmed infected" },
+            { value: "at_risk", label: "At risk" },
+          ].map(({ value, label }) => (
+            <Link
+              key={label}
+              href={buildHref({ flu: value, q })}
+              className={`px-3 py-1 rounded-full ${
+                (flu ?? undefined) === value
+                  ? "bg-bush-green text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
         {speciesList.length === 0 ? (
-          <p className="mt-8 text-zinc-500">No species match "{q}".</p>
+          <p className="mt-8 text-zinc-500">
+            No species match {q ? `"${q}"` : "this filter"}.
+          </p>
         ) : (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {speciesList.map((s) => (
@@ -110,7 +157,7 @@ export default async function SpeciesPage({ searchParams }: SpeciesPageProps) {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          buildHref={(page) => buildHref({ q, page })}
+          buildHref={(page) => buildHref({ q, flu, page })}
         />
       </main>
     </div>
